@@ -21,14 +21,19 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             set -e  # Stop on error
-
             cd /var/www/vhosts/default/htdocs
 
             echo "🧹 Entferne ggf. alten, defekten Ordner..."
             rm -rf TurboInserat
 
             echo "📦 Klone aktuelles Repo..."
-            git clone https://github.com/matlendzi/turboinserat.git TurboInserat
+            if git clone https://github.com/matlendzi/turboinserat.git TurboInserat; then
+              echo "✅ Klonen erfolgreich"
+            else
+              echo "❌ Fehler beim Klonen! Deployment abgebrochen."
+              exit 1
+            fi
+
             chown -R deployer:deployer TurboInserat
 
             cd TurboInserat
