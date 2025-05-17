@@ -1,15 +1,17 @@
 import { useState } from "react";
 import UploadDropzone from "../components/UploadDropzone";
 import StepIndicator from "../components/StepIndicator";
-import { ClipboardDocumentIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
-import API from '../../services/api';
+import { ClipboardDocumentIcon } from "@heroicons/react/24/outline";
+import API from "../../services/api";
 import BlockingOverlay from "../components/BlockingOverlay";
 
-// Hilfsfunktion für die Preisformatierung
 const formatPrice = (price: string | number): string => {
   if (!price) return "";
   const numPrice = typeof price === "string" ? parseFloat(price) : price;
-  return numPrice.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
+  return numPrice.toLocaleString("de-DE", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }) + " €";
 };
 
 const steps = [
@@ -42,12 +44,12 @@ export default function Wizard() {
   const [loading, setLoading] = useState(false);
   const [priceLoading, setPriceLoading] = useState(false);
   const [listingLoading, setListingLoading] = useState(false);
-
-  // Blocking Overlay state
   const [blockingMessage, setBlockingMessage] = useState<string | null>(null);
 
-  // Helper to show overlay for at least 5 seconds
-  const showBlockingMessage = async (message: string, action: () => Promise<void>) => {
+  const showBlockingMessage = async (
+    message: string,
+    action: () => Promise<void>
+  ) => {
     setBlockingMessage(message);
     const start = Date.now();
     try {
@@ -65,33 +67,31 @@ export default function Wizard() {
     }
   };
 
-  // File selection handler
   const handleFileSelect = (file: File) => {
     setSelectedFile(file);
     setPreviewUrl(URL.createObjectURL(file));
   };
 
-  // Step 0: Image analysis
+  const uploadImageAndGetUrl = async (): Promise<string> => {
+    if (!selectedFile) throw new Error("Keine Datei ausgewählt");
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+    const response = await API.post<{ url: string }>("/upload", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return response.data.url;
+  };
+
   const startAnalysis = async () => {
     await showBlockingMessage(
       "Die KI analysiert dein Bild und erkennt Marke, Modell sowie Kategorie...",
       async () => {
         setLoading(true);
-        // Convert selected file to Data URL
-        const dataUrl = selectedFile
-          ? await new Promise<string>((resolve, reject) => {
-              const reader = new FileReader();
-              reader.onload = () =>
-                typeof reader.result === "string"
-                  ? resolve(reader.result)
-                  : reject(new Error("Data-URL konnte nicht gelesen werden"));
-              reader.onerror = () => reject(reader.error);
-              reader.readAsDataURL(selectedFile);
-            })
-          : "";
-
         try {
-          const payload: { image_urls: string[]; ad_process_id?: string } = { image_urls: [dataUrl] };
+          const imageUrl = await uploadImageAndGetUrl();
+          const payload: { image_urls: string[]; ad_process_id?: string } = {
+            image_urls: [imageUrl],
+          };
           if (adProcessId) payload.ad_process_id = adProcessId;
 
           const { data } = await API.post<{
@@ -100,7 +100,7 @@ export default function Wizard() {
           }>("/identify", payload);
 
           setAdProcessId(data.ad_process_id);
-          setAttributes(prev => ({ ...prev, ...data.identification }));
+          setAttributes((prev) => ({ ...prev, ...data.identification }));
           setCurrentStep(1);
         } catch (err: any) {
           console.error("Identify-Error:", err.response?.data || err.message);
@@ -111,19 +111,17 @@ export default function Wizard() {
     );
   };
 
-  // Step 1: Fetch price suggestion
   const fetchPriceSuggestion = async () => {
     if (!adProcessId) return;
-    await API.post('/price/comparables', { ad_process_id: adProcessId });
+    await API.post("/price/comparables", { ad_process_id: adProcessId });
     const response = await API.post<{
       suggested_price: string;
       explanation: string;
-    }>('/price/suggest', { ad_process_id: adProcessId });
+    }>("/price/suggest", { ad_process_id: adProcessId });
     setSuggestion(response.data);
     setPrice(formatPrice(response.data.suggested_price));
   };
 
-  // Step 2: Generate listing
   const fetchListing = async () => {
     if (!adProcessId) return;
     try {
@@ -131,7 +129,7 @@ export default function Wizard() {
       const { data } = await API.get(`/listing/ad-process/${adProcessId}`);
       const listing = data.listing;
       if (listing) {
-        setAttributes(prev => ({
+        setAttributes((prev) => ({
           ...prev,
           title: listing.title,
           description: listing.description,
@@ -145,7 +143,6 @@ export default function Wizard() {
     }
   };
 
-  // Next-step handler with overlay
   const goNext = async () => {
     if (currentStep === 0) {
       await startAnalysis();
@@ -170,11 +167,10 @@ export default function Wizard() {
         }
       );
     } else {
-      setCurrentStep(prev => prev + 1);
+      setCurrentStep((prev) => prev + 1);
     }
   };
 
-  // Clipboard helper
   const copyToClipboard = (text: string) => navigator.clipboard.writeText(text);
 
   return (

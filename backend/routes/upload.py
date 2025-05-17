@@ -3,15 +3,16 @@ import os, uuid
 
 router = APIRouter(prefix="/upload")
 
-# Standard-Ordner für Uploads
+# Upload-Verzeichnis aus .env oder Default verwenden
 UPLOAD_DIR = os.getenv("UPLOAD_DIR", "./uploads")
+BASE_URL = os.getenv("BASE_URL")  # Kann z. B. http://localhost:8000 oder https://deine-domain.de:443 sein
 
 @router.post("/", response_model=dict)
 async def upload_file(request: Request, file: UploadFile = File(...)):
-    # Ordner anlegen, falls nicht existent
+    # Upload-Ordner sicherstellen
     os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-    # Einzigartigen Dateinamen generieren
+    # Sicheren Dateinamen generieren
     ext = os.path.splitext(file.filename)[1]
     new_name = f"{uuid.uuid4().hex}{ext}"
     dest_path = os.path.join(UPLOAD_DIR, new_name)
@@ -23,6 +24,8 @@ async def upload_file(request: Request, file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Upload fehlgeschlagen: {e}")
 
-    # Volle URL zum Bild zurückliefern
-    full_url = str(request.base_url).rstrip("/") + f"/uploads/{new_name}"
+    # BASE_URL aus .env oder dynamisch aus Anfrage ableiten
+    base_url = BASE_URL or str(request.base_url).rstrip("/")
+    full_url = f"{base_url}/uploads/{new_name}"
+
     return {"url": full_url}
