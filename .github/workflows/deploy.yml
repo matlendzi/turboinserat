@@ -26,11 +26,11 @@ jobs:
             echo "🧹 Entferne ggf. alten, defekten Ordner..."
             rm -rf TurboInserat
 
-            echo "📦 Klone aktuelles Repo..."
+            echo " Klone aktuelles Repo..."
             if git clone https://github.com/matlendzi/turboinserat.git TurboInserat; then
               echo "✅ Klonen erfolgreich"
             else
-              echo "❌ Fehler beim Klonen! Deployment abgebrochen."
+              echo "❌ Fehler beim Klonen! Deployment."
               exit 1
             fi
 
