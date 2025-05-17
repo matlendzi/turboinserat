@@ -20,7 +20,15 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            cd /pfad/zu/turboinserat
-            git pull
-            docker-compose down
-            docker-compose up -d --build
+            script: |
+              cd /var/www/vhosts/default/htdocs
+              if [ ! -d "TurboInserat/.git" ]; then
+                git clone https://github.com/matlendzi/turboinserat.git TurboInserat
+                cd TurboInserat
+              else
+                cd TurboInserat
+                git pull
+              fi
+              docker-compose down
+              docker-compose up -d --build
+
