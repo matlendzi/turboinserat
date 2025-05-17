@@ -5,7 +5,8 @@ services:
     build: ./backend
     container_name: backend
     restart: always
-    env_file: .env
+    env_file:
+      - .env
     volumes:
       - ./uploads:/app/uploads  # Zugriff auf Uploads
     depends_on:
