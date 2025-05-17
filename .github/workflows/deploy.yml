@@ -20,13 +20,35 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
+            set -e  # Stop on error
+
             cd /var/www/vhosts/default/htdocs
+
+            # Ordner neu klonen, wenn kein gültiges Repo vorhanden
             if [ ! -d "TurboInserat/.git" ]; then
+              echo "⚠️ Kein gültiges Git-Repo gefunden. Entferne alten Ordner..."
+              rm -rf TurboInserat
               git clone https://github.com/matlendzi/turboinserat.git TurboInserat
-              cd TurboInserat
-            else
-              cd TurboInserat
-              git pull
+              chown -R deployer:deployer TurboInserat  # 👈 NEU: Rechte setzen (optional)
             fi
+
+            cd TurboInserat
+
+            echo "📥 Aktuelle Änderungen ziehen..."
+            git pull
+
+            # Optional: Rechte erneut setzen (falls nötig nach Pull)
+            chown -R deployer:deployer .
+
+            echo "🧼 Container stoppen..."
             docker-compose down
+
+            echo "🚀 Container bauen und starten..."
             docker-compose up -d --build
+
+            echo "✅ Deployment abgeschlossen."
+
+            # Optional: Warnung, falls .env fehlt
+            if [ ! -f ".env" ]; then
+              echo "⚠️ WARNUNG: .env-Datei fehlt. Bitte sicherstellen, dass sie vorhanden ist!"
+            fi
