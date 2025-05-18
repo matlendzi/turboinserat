@@ -1,11 +1,11 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, Request
 import os, uuid
 
-router = APIRouter(prefix="/upload")
+router = APIRouter()
 
 # Upload-Verzeichnis aus .env oder Default verwenden
 UPLOAD_DIR = os.getenv("UPLOAD_DIR", "./uploads")
-BASE_URL = os.getenv("BASE_URL")  # Kann z. B. http://localhost:8000 oder https://deine-domain.de:443 sein
+BASE_URL = os.getenv("BASE_URL")  # Kann z. B. http://localhost:8000 oder https://deine-domain.de:443 sein
 
 @router.post("/", response_model=dict)
 async def upload_file(request: Request, file: UploadFile = File(...)):

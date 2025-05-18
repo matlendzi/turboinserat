@@ -76,7 +76,7 @@ export default function Wizard() {
     if (!selectedFile) throw new Error("Keine Datei ausgewählt");
     const formData = new FormData();
     formData.append("file", selectedFile);
-    const response = await API.post<{ url: string }>("/upload", formData, {
+    const response = await API.post<{ url: string }>("/upload/", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     return response.data.url;
