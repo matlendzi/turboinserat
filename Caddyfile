@@ -26,10 +26,24 @@ http://turboinserat.localhost {
 
 # Production server
 turboinserat.kartenmitwirkung.de {
+    # Enable automatic HTTPS
+    tls {
+        protocols tls1.2 tls1.3
+    }
+
+    # Redirect HTTP to HTTPS
+    @http {
+        protocol http
+    }
+    redir @http https://{host}{uri} permanent
+
     # API reverse proxy
     handle_path /api/* {
         uri strip_prefix /api
-        reverse_proxy backend:8000
+        reverse_proxy backend:8000 {
+            header_up X-Forwarded-Proto https
+            header_up X-Forwarded-Ssl on
+        }
     }
 
     # Static file serving
@@ -40,7 +54,10 @@ turboinserat.kartenmitwirkung.de {
 
     # Frontend reverse proxy
     handle {
-        reverse_proxy frontend:3000
+        reverse_proxy frontend:3000 {
+            header_up X-Forwarded-Proto https
+            header_up X-Forwarded-Ssl on
+        }
     }
 
     # Logging

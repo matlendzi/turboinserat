@@ -18,15 +18,17 @@ services:
     build:
       context: ./frontend
       args:
-        - BUILD_MODE=${BUILD_MODE:-production}
+        - BUILD_MODE=${BUILD_MODE}
+        - VITE_API_URL=${VITE_API_URL}
     container_name: frontend
     restart: always
     env_file:
-      - ./frontend/.env.${BUILD_MODE:-production}
+      - ./frontend/.env.${BUILD_MODE}
     networks:
       - proxy
     environment:
-      - NODE_ENV=${BUILD_MODE:-production}
+      - NODE_ENV=${BUILD_MODE}
+      - VITE_API_URL=${VITE_API_URL}
 
   mongo:
     image: mongo:6
