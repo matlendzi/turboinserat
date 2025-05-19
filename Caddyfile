@@ -1,6 +1,6 @@
 # Local development
 turboinserat.localhost {
-    # Enable automatic HTTPS with local certificates
+    # Enable automatic HTTPS wi with local certificates
     tls internal
 
     # API reverse proxy
