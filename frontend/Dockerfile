@@ -6,8 +6,8 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install
+# Install ALL dependencies (including devDependencies)
+RUN npm install --legacy-peer-deps
 
 # Copy source code
 COPY . .
@@ -30,7 +30,7 @@ COPY --from=builder /app/build ./build
 COPY --from=builder /app/package*.json ./
 
 # Install only production dependencies
-RUN npm install --production
+RUN npm install --production --legacy-peer-deps
 
 # Set environment variables
 ENV HOST=0.0.0.0
