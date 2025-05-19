@@ -4,9 +4,16 @@
   "type": "module",
   "scripts": {
     "build": "react-router build",
+    "build:production": "react-router build --mode production",
+    "build:development": "react-router build --mode development",
     "dev": "react-router dev",
+    "dev:local": "react-router dev --mode development",
     "start": "react-router-serve ./build/server/index.js",
-    "typecheck": "react-router typegen && tsc"
+    "start:prod": "react-router-serve ./build/server/index.js --mode production",
+    "typecheck": "react-router typegen && tsc",
+    "preview": "vite preview",
+    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\""
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",

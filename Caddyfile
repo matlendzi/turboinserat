@@ -1,0 +1,74 @@
+# Local development
+turboinserat.localhost {
+    # Enable automatic HTTPS with local certificates
+    tls internal
+
+    # API reverse proxy
+    handle /api/* {
+        reverse_proxy backend:8000 {
+            header_up Host {host}
+            header_up X-Real-IP {remote}
+            header_up X-Forwarded-For {remote}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+
+    # Static file serving
+    handle /uploads/* {
+        root * /uploads
+        file_server
+    }
+
+    # Frontend reverse proxy
+    handle {
+        reverse_proxy frontend:3000 {
+            header_up Host {host}
+            header_up X-Real-IP {remote}
+            header_up X-Forwarded-For {remote}
+            header_up X-Forwarded-Proto {scheme}
+            header_up Accept-Encoding "gzip, deflate, br"
+        }
+    }
+
+    # Logging
+    log {
+        output file /var/log/caddy/access.log
+        format json
+    }
+}
+
+# Production server
+turboinserat.kartenmitwirkung.de {
+    # API reverse proxy
+    handle /api/* {
+        reverse_proxy backend:8000 {
+            header_up Host {host}
+            header_up X-Real-IP {remote}
+            header_up X-Forwarded-For {remote}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+
+    # Static file serving
+    handle /uploads/* {
+        root * /uploads
+        file_server
+    }
+
+    # Frontend reverse proxy
+    handle {
+        reverse_proxy frontend:3000 {
+            header_up Host {host}
+            header_up X-Real-IP {remote}
+            header_up X-Forwarded-For {remote}
+            header_up X-Forwarded-Proto {scheme}
+            header_up Accept-Encoding "gzip, deflate, br"
+        }
+    }
+
+    # Logging
+    log {
+        output file /var/log/caddy/access.log
+        format json
+    }
+} 

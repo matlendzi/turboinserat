@@ -50,5 +50,5 @@ jobs:
             echo "✅ Deployment abgeschlossen."
 
             if [ ! -f ".env" ]; then
-              echo "⚠️ WARNUNG: .env-Datei fehlt!"
+              echo "⚠️ WARNUNG: .env-Datei fehlt"
             fi
