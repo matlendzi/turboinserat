@@ -76,7 +76,7 @@ export default function Wizard() {
     if (!selectedFile) throw new Error("Keine Datei ausgewählt");
     const formData = new FormData();
     formData.append("file", selectedFile);
-    const response = await API.post<{ url: string }>("/api/upload/", formData, {
+    const response = await API.post<{ url: string }>("/upload/", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     return response.data.url;
@@ -97,7 +97,7 @@ export default function Wizard() {
           const { data } = await API.post<{
             ad_process_id: string;
             identification: Record<string, any>;
-          }>("/api/identify", payload);
+          }>("/identify/", payload);
 
           setAdProcessId(data.ad_process_id);
           setAttributes((prev) => ({ ...prev, ...data.identification }));
@@ -113,11 +113,11 @@ export default function Wizard() {
 
   const fetchPriceSuggestion = async () => {
     if (!adProcessId) return;
-    await API.post("/api/price/comparables", { ad_process_id: adProcessId });
+    await API.post("/price/comparables/", { ad_process_id: adProcessId });
     const response = await API.post<{
       suggested_price: string;
       explanation: string;
-    }>("/api/price/suggest", { ad_process_id: adProcessId });
+    }>("/price/suggest/", { ad_process_id: adProcessId });
     setSuggestion(response.data);
     setPrice(formatPrice(response.data.suggested_price));
   };
@@ -125,8 +125,8 @@ export default function Wizard() {
   const fetchListing = async () => {
     if (!adProcessId) return;
     try {
-      await API.post("/api/listing/generate", { ad_process_id: adProcessId });
-      const { data } = await API.get(`/api/listing/ad-process/${adProcessId}`);
+      await API.post("/listing/generate/", { ad_process_id: adProcessId });
+      const { data } = await API.get(`/listing/ad-process/${adProcessId}/`);
       const listing = data.listing;
       if (listing) {
         setAttributes((prev) => ({

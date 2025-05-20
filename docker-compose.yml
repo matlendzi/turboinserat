@@ -7,8 +7,6 @@ services:
       - .env
     volumes:
       - ./uploads:/app/uploads
-    ports:
-      - "8000:8000"
     depends_on:
       - mongo
     networks:

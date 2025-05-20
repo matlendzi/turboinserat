@@ -30,7 +30,7 @@ app.include_router(listing_router,   prefix=f"{CurrentConfig.API_PREFIX}/listing
 app.include_router(upload_router,    prefix=f"{CurrentConfig.API_PREFIX}/upload",   tags=["upload"])
 
 # Statische Dateien ausliefern (Upload-Ordner)
-app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
+app.mount("/api/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 @app.get("/")
 def root():

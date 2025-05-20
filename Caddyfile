@@ -2,12 +2,11 @@
 http://turboinserat.localhost {
     # API reverse proxy
     handle_path /api/* {
-        uri strip_prefix /api
         reverse_proxy backend:8000
     }
 
-    # Static file serving
-    handle /uploads/* {
+    # Serve uploaded files
+    handle_path /uploads/* {
         root * /uploads
         file_server
     }
@@ -24,7 +23,7 @@ http://turboinserat.localhost {
     }
 }
 
-# Production server
+# Production server - Subdomain only
 turboinserat.kartenmitwirkung.de {
     # Enable automatic HTTPS
     tls {
@@ -39,15 +38,17 @@ turboinserat.kartenmitwirkung.de {
 
     # API reverse proxy
     handle_path /api/* {
-        uri strip_prefix /api
         reverse_proxy backend:8000 {
             header_up X-Forwarded-Proto https
             header_up X-Forwarded-Ssl on
+            header_up Host {host}
+            header_up X-Real-IP {remote}
+            header_up X-Forwarded-For {remote}
         }
     }
 
-    # Static file serving
-    handle /uploads/* {
+    # Serve uploaded files
+    handle_path /uploads/* {
         root * /uploads
         file_server
     }
@@ -60,9 +61,14 @@ turboinserat.kartenmitwirkung.de {
         }
     }
 
-    # Logging
+    # Global logging
     log {
         output file /var/log/caddy/access.log
-        format json
+        format json {
+            time_format iso8601
+            message_key msg
+            level_key level
+            level_format upper
+        }
     }
 } 

@@ -5,4 +5,6 @@ motor
 pymongo
 openai
 python-decouple
+Pillow
 python-multipart
+

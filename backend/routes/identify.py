@@ -118,6 +118,27 @@ async def identify(req: IdentifyRequest):
         raise HTTPException(status_code=400, detail="No image URLs provided")
 
     try:
+        print("\n🔍 OPENAI REQUEST (IDENTIFY):")
+        print("=" * 80)
+        print(json.dumps({
+            "model": "gpt-4.1-mini",
+            "input": [{
+                "role": "user",
+                "content": [
+                    {"type": "input_text", "text": PROMPT_1},
+                    {"type": "input_image", "image_url": req.image_urls[0]}
+                ]
+            }],
+            "text": {"format": {"type": "text"}},
+            "reasoning": {},
+            "tools": [],
+            "temperature": 1,
+            "max_output_tokens": 2048,
+            "top_p": 1,
+            "store": True
+        }, indent=2, ensure_ascii=False))
+        print("=" * 80)
+        
         response = client.responses.create(
             model="gpt-4.1-mini",
             input=[{
@@ -135,6 +156,11 @@ async def identify(req: IdentifyRequest):
             top_p=1,
             store=True
         )
+        
+        print("\n🔍 OPENAI RESPONSE (IDENTIFY):")
+        print("=" * 80)
+        print(json.dumps(response.model_dump(), indent=2, ensure_ascii=False))
+        print("=" * 80)
 
         parsed_text = response.output[0].content[0].text.strip()
         # JSON-Code-Fence entfernen

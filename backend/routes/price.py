@@ -44,7 +44,7 @@ def extract_condition(details_text):
     match = re.search(r"Zustand:([^|]+)", details_text)
     return match.group(1).strip() if match else None
 
-@router.post("/update_attributes")
+@router.post("/update_attributes/")
 async def update_attributes(req: UpdateAttributesRequest):
     try:
         ad_id = ObjectId(req.ad_process_id)
@@ -68,7 +68,7 @@ async def update_attributes(req: UpdateAttributesRequest):
     return {"brand": data.get("brand"), "model_or_type": data.get("model_or_type")}
 
 
-@router.post("/ads/comparables")
+@router.post("/ads/comparables/")
 async def get_comparables_from_query(req: AdSearchRequest):
     api_key = config("KLEINANZEIGEN_API_KEY")
     url = "https://api.kleinanzeigen-agent.de/ads/v1/kleinanzeigen/search"
@@ -90,7 +90,7 @@ async def get_comparables_from_query(req: AdSearchRequest):
 
     return response.json()
 
-@router.post("/comparables")
+@router.post("/comparables/")
 async def fetch_and_store_comparables(req: ComparableRequest):
     ad_id = ObjectId(req.ad_process_id)
     ad = await ad_collection.find_one({"_id": ad_id})
@@ -147,7 +147,7 @@ async def fetch_and_store_comparables(req: ComparableRequest):
         "count": len(cleaned_ads)
     }
 
-@router.post("/suggest")
+@router.post("/suggest/")
 async def generate_price_suggestion(req: PriceSuggestionRequest):
     ad_id = ObjectId(req.ad_process_id)
     ad = await ad_collection.find_one({"_id": ad_id})
@@ -165,7 +165,7 @@ async def generate_price_suggestion(req: PriceSuggestionRequest):
         "content": """
             Du bist ein KI-Experte für Preisfindung gebrauchter Produkte auf Kleinanzeigenplattformen.
         Antworte **immer auf Deutsch** und gib ausschließlich gültiges JSON zurück.
-        
+
         Du erhältst:
         (1) Produktdaten eines Nutzers
         (2) Vergleichsanzeigen ähnlicher Produkte
@@ -180,8 +180,8 @@ async def generate_price_suggestion(req: PriceSuggestionRequest):
         **Wichtig:** Deine Antwort muss komplett auf Deutsch formuliert sein.
         Antworte ausschließlich mit folgendem JSON-Schema:
         {
-        "suggested_price": "XX.XX",  
-        "pricerelevante_faktoren": "...", 
+        "suggested_price": "XX.XX",
+        "pricerelevante_faktoren": "...",
         "explanation": "..."
         }
         """

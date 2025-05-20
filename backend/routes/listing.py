@@ -25,7 +25,7 @@ def format_price(price: str | float | None) -> str:
 class ListingRequest(BaseModel):
     ad_process_id: str
 
-@router.post("/generate")
+@router.post("/generate/")
 async def generate_listing(req: ListingRequest):
     ad_id = ObjectId(req.ad_process_id)
     ad = await ad_collection.find_one({"_id": ad_id})
@@ -48,24 +48,24 @@ async def generate_listing(req: ListingRequest):
 
         Erstelle aus den folgenden Produktdaten eine Anzeige mit:
 
-        - **title** (max. 60 Zeichen):  
-        Verwende klare Schlagwörter wie Produktname, Marke, Zustand und ggf. relevante Eigenschaften (sofern in den Daten enthalten).  
+        - **title** (max. 60 Zeichen):
+        Verwende klare Schlagwörter wie Produktname, Marke, Zustand und ggf. relevante Eigenschaften (sofern in den Daten enthalten).
         Verwende keine erfundenen Begriffe. Nutze nur die bereitgestellten Informationen.
 
-        - **description** (max. 500 Zeichen):  
-        Gib möglichst viele relevante Informationen wieder: Maße, Gewicht, Kaufdatum, Zustand, Zubehör, Besonderheiten – aber **nur**, wenn sie in den Daten vorkommen.  
-        Keine Halluzinationen oder Ergänzungen. Verwende ausschließlich die gelieferten Daten.  
-        Du darfst freundliche Formulierungen und strukturierte Sätze nutzen, solange sie inhaltlich korrekt bleiben.  
+        - **description** (max. 500 Zeichen):
+        Gib möglichst viele relevante Informationen wieder: Maße, Gewicht, Kaufdatum, Zustand, Zubehör, Besonderheiten – aber **nur**, wenn sie in den Daten vorkommen.
+        Keine Halluzinationen oder Ergänzungen. Verwende ausschließlich die gelieferten Daten.
+        Du darfst freundliche Formulierungen und strukturierte Sätze nutzen, solange sie inhaltlich korrekt bleiben.
         Wenn möglich, formuliere ehrlich und transparent, ohne Dinge hinzuzufügen, die nicht erwähnt wurden (z. B. keine Versandinfos erfinden).
 
-        - **condition**:  
+        - **condition**:
         Wird direkt aus dem übergebenen Zustand übernommen.
 
-        - **category**:  
+        - **category**:
         Wird direkt übernommen.
 
-        - **price**:  
-        Wenn Preis vorhanden, gib ihn als Zahl aus.  
+        - **price**:
+        Wenn Preis vorhanden, gib ihn als Zahl aus.
         Wenn kein Preis übergeben wird, schreibe \"Preis auf Anfrage\".
 
         Gib die Antwort **ausschließlich** im folgenden JSON-Format aus:
@@ -78,7 +78,7 @@ async def generate_listing(req: ListingRequest):
         \"price\": \"...\" // Preis auf Anfrage oder formatierter Preis
         }
 
-        ⚠️ Wichtig: Antworte **nur basierend auf den übergebenen Daten**.  
+        ⚠️ Wichtig: Antworte **nur basierend auf den übergebenen Daten**.
         Erfinde keine zusätzlichen Eigenschaften, Zubehörteile oder Nutzungsangaben.
         """
     }
@@ -108,7 +108,7 @@ async def generate_listing(req: ListingRequest):
             parsed = json.loads(raw)
         except json.JSONDecodeError:
             raise HTTPException(status_code=500, detail=f"Antwort kein gültiges JSON: {raw}")
-        
+
           # Fallbacks setzen, wenn GPT Mist baut
         parsed.setdefault("title", "Titel fehlt")
         parsed.setdefault("description", "Keine Beschreibung generiert")
@@ -136,7 +136,7 @@ async def generate_listing(req: ListingRequest):
         raise HTTPException(status_code=500, detail=f"OpenAI-Fehler: {str(e)}")
 
 
-@router.get("/ad-process/{ad_process_id}")
+@router.get("/ad-process/{ad_process_id}/")
 async def get_process_details(ad_process_id: str):
     ad_id = ObjectId(ad_process_id)
     ad = await ad_collection.find_one({"_id": ad_id}, {
@@ -151,7 +151,7 @@ async def get_process_details(ad_process_id: str):
     return json.loads(dumps(ad))
 
 
-@router.get("/ad-processes")
+@router.get("/ad-processes/")
 async def list_ad_processes(user_id: str = Query(...)):
     results = await ad_collection.find({"user_id": user_id}).to_list(length=100)
     return json.loads(dumps(results))
